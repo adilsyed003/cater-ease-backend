@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/items")
@@ -18,6 +19,11 @@ public class ItemController {
     @GetMapping
     public List<Item> getAllItems() {
         return repository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Optional<Item> getItemById(@PathVariable Long id) {
+        return repository.findById(String.valueOf(id));
     }
 
     @PostMapping
