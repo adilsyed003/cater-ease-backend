@@ -13,13 +13,14 @@ public class Item {
     private String name;
     private String description;
     private List<String> dishes;
-
+    private List<Double> prices;
     public Item() {}
 
     public Item(String name, String description) {
         this.name = name;
         this.description = description;
         this.dishes = new ArrayList<String>();
+        this.prices = new ArrayList<>();
     }
 
 
@@ -32,4 +33,6 @@ public class Item {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public List<String> getDishes() { return dishes; }
+    public List<Double> getPrices() { return prices; }
+    public void setPrices(List<Double> prices) { this.prices = prices; }
 }
