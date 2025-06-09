@@ -1,26 +1,24 @@
-# Stage 1: Build the application using a Maven image with JDK
+# Stage 1: Build the app using Maven + JDK 21
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copy only pom.xml and download dependencies (cacheable layer)
+# Optimize layer caching
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
-# Now copy the full source
+# Copy app source
 COPY src ./src
-
-# Package the application
 RUN mvn clean package -DskipTests
 
-# Stage 2: Use a lightweight JRE for running the app
+# Stage 2: Minimal runtime using JRE 21
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Copy only the built JAR from the build stage
+# Copy built JAR
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose application port
+# Expose port
 EXPOSE 8081
 
-# Run the application
+# Start app
 ENTRYPOINT ["java", "-jar", "app.jar"]
