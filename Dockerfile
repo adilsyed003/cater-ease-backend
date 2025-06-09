@@ -1,28 +1,26 @@
-# Stage 1: Build the application using JDK 24 (if available)
-FROM openjdk:24-jdk AS build
+# Stage 1: Build the application using a Maven image with JDK
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
+
+# Copy only pom.xml and download dependencies (cacheable layer)
 COPY pom.xml .
-COPY src src
+RUN mvn dependency:go-offline
 
-# Copy Maven wrapper
-COPY mvnw .
-COPY .mvn .mvn
+# Now copy the full source
+COPY src ./src
 
-# Set execution permission for the Maven wrapper
-RUN chmod +x ./mvnw
+# Package the application
+RUN mvn clean package -DskipTests
 
-# Build the application without running tests
-RUN ./mvnw clean package -DskipTests
+# Stage 2: Use a lightweight JRE for running the app
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
 
-# Stage 2: Create the final Docker image using OpenJDK 24
-FROM openjdk:24-jdk
-VOLUME /tmp
-
-# Copy the JAR from the build stage
+# Copy only the built JAR from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-
-# Expose port for Spring Boot application
+# Expose application port
 EXPOSE 8081
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]
